@@ -39,6 +39,7 @@ def generator_model():
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
 
+    # create 9 ResBlock
     mult = 2**n_downsampling
     for i in range(n_blocks_gen):
         x = res_block(x, ngf*mult, dropout=True)
