@@ -1,3 +1,4 @@
+import conv_utils
 import tensorflow as tf
 
 from keras.models import Model
@@ -5,11 +6,10 @@ from keras.engine import InputSpec
 from keras.engine.topology import Layer
 from keras.layers import Input, Conv2D, Activation, BatchNormalization
 from keras.layers.merge import Add
-import conv_utils
 from keras.layers.core import Dropout
 
 
-def res_block(input, filters, kernel_size=(3, 3), strides=(1, 1), use_dropout=False):
+def res_block(input, filters, kernel_size=(3, 3), strides=(1, 1), dropout=False):
     """
     Instanciate a Keras Resnet Block using sequential API.
 
@@ -17,7 +17,7 @@ def res_block(input, filters, kernel_size=(3, 3), strides=(1, 1), use_dropout=Fa
     :param filters: Number of filters to use
     :param kernel_size: Shape of the kernel for the convolution
     :param strides: Shape of the strides for the convolution
-    :param use_dropout: Boolean value to determine the use of dropout
+    :param dropout: Boolean value to determine the use of dropout
     :return: Keras Model
     """
     x = ReflectionPadding2D((1, 1))(input)
@@ -27,7 +27,7 @@ def res_block(input, filters, kernel_size=(3, 3), strides=(1, 1), use_dropout=Fa
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
 
-    if use_dropout:
+    if dropout:
         x = Dropout(0.5)(x)
 
     x = ReflectionPadding2D((1, 1))(x)

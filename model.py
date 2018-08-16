@@ -24,7 +24,6 @@ n_blocks_gen = 9
 
 def generator_model():
     """Build generator architecture."""
-    # Current version : ResNet block
     inputs = Input(shape=image_shape)
 
     x = ReflectionPadding2D((3, 3))(inputs)
@@ -35,17 +34,19 @@ def generator_model():
     n_downsampling = 2
     for i in range(n_downsampling):
         mult = 2**i
-        x = Conv2D(filters=ngf*mult*2, kernel_size=(3, 3), strides=2, padding='same')(x)
+        x = Conv2D(filters=ngf*mult*2, kernel_size=(3, 3),
+                   strides=(2, 2), padding='same')(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
 
     mult = 2**n_downsampling
     for i in range(n_blocks_gen):
-        x = res_block(x, ngf*mult, use_dropout=True)
+        x = res_block(x, ngf*mult, dropout=True)
 
     for i in range(n_downsampling):
         mult = 2**(n_downsampling - i)
-        x = Conv2DTranspose(filters=int(ngf * mult / 2), kernel_size=(3, 3), strides=2, padding='same')(x)
+        x = Conv2DTranspose(filters=int(ngf * mult / 2),
+                            kernel_size=(3, 3), strides=2, padding='same')(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
 
@@ -66,18 +67,21 @@ def discriminator_model():
     n_layers, use_sigmoid = 3, False
     inputs = Input(shape=input_shape_discriminator)
 
-    x = Conv2D(filters=ndf, kernel_size=(4, 4), strides=2, padding='same')(inputs)
+    x = Conv2D(filters=ndf, kernel_size=(4, 4),
+               strides=2, padding='same')(inputs)
     x = LeakyReLU(0.2)(x)
 
     nf_mult, nf_mult_prev = 1, 1
     for n in range(n_layers):
         nf_mult_prev, nf_mult = nf_mult, min(2**n, 8)
-        x = Conv2D(filters=ndf*nf_mult, kernel_size=(4, 4), strides=2, padding='same')(x)
+        x = Conv2D(filters=ndf*nf_mult, kernel_size=(4, 4),
+                   strides=2, padding='same')(x)
         x = BatchNormalization()(x)
         x = LeakyReLU(0.2)(x)
 
     nf_mult_prev, nf_mult = nf_mult, min(2**n_layers, 8)
-    x = Conv2D(filters=ndf*nf_mult, kernel_size=(4, 4), strides=1, padding='same')(x)
+    x = Conv2D(filters=ndf*nf_mult, kernel_size=(4, 4),
+               strides=1, padding='same')(x)
     x = BatchNormalization()(x)
     x = LeakyReLU(0.2)(x)
 
@@ -114,5 +118,6 @@ if __name__ == '__main__':
     g.summary()
     d = discriminator_model()
     d.summary()
-    m = generator_containing_discriminator(generator_model(), discriminator_model())
+    m = generator_containing_discriminator(
+        generator_model(), discriminator_model())
     m.summary()
